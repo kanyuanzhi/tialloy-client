@@ -12,26 +12,25 @@ import (
 )
 
 type Connection struct {
-	Client       ticface.IClient
-	Conn         net.Conn
+	Client ticface.IClient
+	Conn   net.Conn
 
 	sync.RWMutex
 
-	MsgChan      chan []byte
-	MsgHandler   ticface.IMsgHandler
-	ctx          context.Context
-	cancel       context.CancelFunc
-	IsClosed     bool
-
+	MsgChan    chan []byte
+	MsgHandler ticface.IMsgHandler
+	ctx        context.Context
+	cancel     context.CancelFunc
+	IsClosed   bool
 }
 
 func NewConnection(client ticface.IClient, conn net.Conn, handler ticface.IMsgHandler) ticface.IConnection {
 	return &Connection{
-		Client:       client,
-		Conn:         conn,
-		IsClosed:     false,
-		MsgChan:      make(chan []byte),
-		MsgHandler:   handler,
+		Client:     client,
+		Conn:       conn,
+		IsClosed:   false,
+		MsgChan:    make(chan []byte),
+		MsgHandler: handler,
 	}
 }
 
@@ -108,8 +107,9 @@ func (c *Connection) Start() {
 }
 
 func (c *Connection) Reconnect() {
+	c.cancel()
 	c.Conn = c.Client.Dial()
-	c.Start()
+	go c.Start()
 }
 
 func (c *Connection) Stop() {
@@ -122,7 +122,6 @@ func (c *Connection) Stop() {
 
 	c.Conn.Close()
 	c.cancel()
-
 
 	close(c.MsgChan)
 
@@ -150,6 +149,6 @@ func (c *Connection) GetConn() net.Conn {
 	return c.Conn
 }
 
-func (c *Connection) Context() context.Context{
+func (c *Connection) Context() context.Context {
 	return c.ctx
 }

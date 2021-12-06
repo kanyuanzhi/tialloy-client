@@ -49,7 +49,7 @@ func (c *Client) Start() {
 	utils.GlobalLog.Info("client starts")
 	go func() {
 		conn := c.Dial()
-		utils.GlobalLog.Info("touch server successfully")
+		utils.GlobalLog.Infof("touch server %s:%d successfully", c.ServerHost, c.ServerPort)
 		dealConn := NewConnection(c, conn, c.MsgHandler)
 		go dealConn.Start()
 	}()
@@ -62,7 +62,7 @@ func (c *Client) Stop() {
 func (c *Client) Serve() {
 	c.Start()
 
-	select{}
+	select {}
 }
 
 func (c *Client) SetOnConnStart(hookFunc func(connection ticface.IConnection)) {
@@ -73,7 +73,7 @@ func (c *Client) CallOnConnStart(connection ticface.IConnection) {
 	if c.OnConnStart != nil {
 		utils.GlobalLog.Tracef("call DoOnConnStartHook")
 		c.OnConnStart(connection)
-	}else {
+	} else {
 		utils.GlobalLog.Tracef("there is no DoOnConnStartHook")
 	}
 }
