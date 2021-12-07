@@ -29,7 +29,7 @@ func NewClient() ticface.IClient {
 }
 
 func (c *Client) Dial() net.Conn {
-	ticker := time.NewTicker(utils.GlobalObject.ReconnectionInterval)
+	ticker := time.NewTicker(utils.GlobalObject.ReconnectInterval)
 	var err error
 	var conn net.Conn
 	for {

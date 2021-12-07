@@ -18,7 +18,7 @@ type GlobalObj struct {
 	TcpWorkerPoolSize   uint32 `json:"tcp_worker_pool_size,omitempty"`
 	TcpMaxWorkerTaskLen uint32 `json:"tcp_max_worker_task_len,omitempty"`
 
-	ReconnectionInterval time.Duration `json:"reconnection_interval,omitempty"`
+	ReconnectInterval time.Duration `json:"reconnect_interval,omitempty"`
 
 	LogMode bool `json:"log_mode,omitempty"`
 }
@@ -58,7 +58,7 @@ func init() {
 		TcpWorkerPoolSize:   2,
 		TcpMaxWorkerTaskLen: 2,
 
-		ReconnectionInterval: 1,
+		ReconnectInterval: 1,
 
 		LogMode: true, // true：详细，打印log在代码中输出位置；false：简要，不打印文件输出位置，不打印debug和trace（性能高，生产环境使用）
 	}
