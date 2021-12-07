@@ -29,7 +29,7 @@ func NewClient() ticface.IClient {
 }
 
 func (c *Client) Dial() net.Conn {
-	ticker := time.NewTicker(utils.GlobalObject.ReconnectInterval)
+	ticker := time.NewTicker(utils.GlobalObject.ReconnectInterval * time.Second)
 	var err error
 	var conn net.Conn
 	for {
@@ -37,7 +37,7 @@ func (c *Client) Dial() net.Conn {
 		case <-ticker.C:
 			conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", c.ServerHost, c.ServerPort))
 			if err != nil {
-				utils.GlobalLog.Errorf("touch server %s:%d failed", c.ServerHost, c.ServerPort)
+				utils.GlobalLog.Errorf("touch server %s:%d failed, trying retouch every %d second(s)", c.ServerHost, c.ServerPort, utils.GlobalObject.ReconnectInterval)
 				break
 			}
 			return conn
@@ -46,7 +46,7 @@ func (c *Client) Dial() net.Conn {
 }
 
 func (c *Client) Start() {
-	utils.GlobalLog.Info("client starts")
+	utils.GlobalLog.Info("client is starting")
 	go func() {
 		conn := c.Dial()
 		utils.GlobalLog.Infof("touch server %s:%d successfully", c.ServerHost, c.ServerPort)
