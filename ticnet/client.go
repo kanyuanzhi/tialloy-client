@@ -2,8 +2,9 @@ package ticnet
 
 import (
 	"fmt"
+	"github.com/kanyuanzhi/tialloy-client/global"
 	"github.com/kanyuanzhi/tialloy-client/ticface"
-	"github.com/kanyuanzhi/tialloy-client/utils"
+	"github.com/kanyuanzhi/tialloy-client/ticlog"
 	"net"
 	"time"
 )
@@ -21,15 +22,15 @@ type Client struct {
 
 func NewClient() ticface.IClient {
 	return &Client{
-		Name:       utils.GlobalObject.Name,
-		ServerHost: utils.GlobalObject.ServerHost,
-		ServerPort: utils.GlobalObject.ServerPort,
+		Name:       global.Object.Name,
+		ServerHost: global.Object.ServerHost,
+		ServerPort: global.Object.ServerPort,
 		MsgHandler: NewMsgHandler(),
 	}
 }
 
 func (c *Client) Dial() net.Conn {
-	ticker := time.NewTicker(utils.GlobalObject.ReconnectInterval * time.Second)
+	ticker := time.NewTicker(global.Object.ReconnectInterval * time.Second)
 	var err error
 	var conn net.Conn
 	for {
@@ -37,7 +38,7 @@ func (c *Client) Dial() net.Conn {
 		case <-ticker.C:
 			conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", c.ServerHost, c.ServerPort))
 			if err != nil {
-				utils.GlobalLog.Errorf("touch server %s:%d failed, trying retouch every %d second(s)", c.ServerHost, c.ServerPort, utils.GlobalObject.ReconnectInterval)
+				ticlog.Log.Errorf("touch server %s:%d failed, trying retouch every %d second(s)", c.ServerHost, c.ServerPort, global.Object.ReconnectInterval)
 				break
 			}
 			return conn
@@ -46,10 +47,10 @@ func (c *Client) Dial() net.Conn {
 }
 
 func (c *Client) Start() {
-	utils.GlobalLog.Info("client is starting")
+	ticlog.Log.Info("client is starting")
 	go func() {
 		conn := c.Dial()
-		utils.GlobalLog.Infof("touch server %s:%d successfully", c.ServerHost, c.ServerPort)
+		ticlog.Log.Infof("touch server %s:%d successfully", c.ServerHost, c.ServerPort)
 		dealConn := NewConnection(c, conn, c.MsgHandler)
 		go dealConn.Start()
 	}()
@@ -71,9 +72,9 @@ func (c *Client) SetOnConnStart(hookFunc func(connection ticface.IConnection)) {
 
 func (c *Client) CallOnConnStart(connection ticface.IConnection) {
 	if c.OnConnStart != nil {
-		utils.GlobalLog.Tracef("call DoOnConnStartHook")
+		ticlog.Log.Tracef("call DoOnConnStartHook")
 		c.OnConnStart(connection)
 	} else {
-		utils.GlobalLog.Tracef("there is no DoOnConnStartHook")
+		ticlog.Log.Tracef("there is no DoOnConnStartHook")
 	}
 }

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"github.com/kanyuanzhi/tialloy-client/global"
 	"github.com/kanyuanzhi/tialloy-client/ticface"
-	"github.com/kanyuanzhi/tialloy-client/utils"
 )
 
 type DataPack struct {
@@ -51,7 +51,7 @@ func (d *DataPack) Unpack(binaryData []byte) (ticface.IMessage, error) {
 		return nil, err
 	}
 
-	if utils.GlobalObject.TcpMaxPacketSize > 0 && message.DataLen > utils.GlobalObject.TcpMaxPacketSize {
+	if global.Object.TcpMaxPacketSize > 0 && message.DataLen > global.Object.TcpMaxPacketSize {
 		return nil, errors.New("received data size is larger than max packet size")
 	}
 

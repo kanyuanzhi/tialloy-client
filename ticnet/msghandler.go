@@ -1,8 +1,9 @@
 package ticnet
 
 import (
+	"github.com/kanyuanzhi/tialloy-client/global"
 	"github.com/kanyuanzhi/tialloy-client/ticface"
-	"github.com/kanyuanzhi/tialloy-client/utils"
+	"github.com/kanyuanzhi/tialloy-client/ticlog"
 )
 
 type MsgHandler struct {
@@ -15,9 +16,9 @@ type MsgHandler struct {
 func NewMsgHandler() ticface.IMsgHandler {
 	return &MsgHandler{
 		Apis:             make(map[uint32]ticface.IRouter),
-		WorkerPoolSize:   utils.GlobalObject.TcpWorkerPoolSize,
-		MaxWorkerTaskLen: utils.GlobalObject.TcpMaxWorkerTaskLen,
-		TaskQueue: make([]chan ticface.IRequest, utils.GlobalObject.TcpWorkerPoolSize),
+		WorkerPoolSize:   global.Object.TcpWorkerPoolSize,
+		MaxWorkerTaskLen: global.Object.TcpMaxWorkerTaskLen,
+		TaskQueue:        make([]chan ticface.IRequest, global.Object.TcpWorkerPoolSize),
 	}
 }
 
@@ -25,7 +26,7 @@ func (mh *MsgHandler) DoMsgHandler(request ticface.IRequest) {
 	msgID := request.GetMsgID()
 	handler, ok := mh.Apis[msgID]
 	if !ok {
-		utils.GlobalLog.Warnf("api msgID=%d is not found", msgID)
+		ticlog.Log.Warnf("api msgID=%d is not found", msgID)
 		return
 	}
 	handler.PreHandle(request)
@@ -35,15 +36,15 @@ func (mh *MsgHandler) DoMsgHandler(request ticface.IRequest) {
 
 func (mh *MsgHandler) AddRouter(msgID uint32, router ticface.IRouter) {
 	if _, ok := mh.Apis[msgID]; ok {
-		utils.GlobalLog.Warnf("api msgID=%d repeated", msgID)
+		ticlog.Log.Warnf("api msgID=%d repeated", msgID)
 		return
 	}
 	mh.Apis[msgID] = router
-	utils.GlobalLog.Tracef("api msgID=%d added", msgID)
+	ticlog.Log.Tracef("api msgID=%d added", msgID)
 }
 
 func (mh *MsgHandler) StartOneWorkerPool(workerID int, taskQueue chan ticface.IRequest) {
-	utils.GlobalLog.Tracef("worker id=%d started", workerID)
+	ticlog.Log.Tracef("worker id=%d started", workerID)
 	for {
 		select {
 		case request := <-taskQueue:
@@ -61,6 +62,6 @@ func (mh *MsgHandler) StartWorkerPool() {
 
 func (mh *MsgHandler) SendMsgToTaskQueue(request ticface.IRequest) {
 	workerID := request.GetMsgID() % mh.WorkerPoolSize
-	utils.GlobalLog.Tracef("add msgID=%d to workerID=%d", request.GetMsgID(), workerID)
+	ticlog.Log.Tracef("add msgID=%d to workerID=%d", request.GetMsgID(), workerID)
 	mh.TaskQueue[workerID] <- request
 }

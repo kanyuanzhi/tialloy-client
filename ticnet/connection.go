@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/kanyuanzhi/tialloy-client/global"
 	"github.com/kanyuanzhi/tialloy-client/ticface"
-	"github.com/kanyuanzhi/tialloy-client/utils"
+	"github.com/kanyuanzhi/tialloy-client/ticlog"
 	"io"
 	"net"
 	"sync"
@@ -36,9 +37,9 @@ func NewConnection(client ticface.IClient, conn net.Conn, handler ticface.IMsgHa
 
 func (c *Connection) StartReader() {
 	// TODO unfinished
-	utils.GlobalLog.Info("tcp reader goroutine is running")
+	ticlog.Log.Info("tcp reader goroutine is running")
 	defer c.Reconnect()
-	defer utils.GlobalLog.Warn("tcp reader goroutine exited")
+	defer ticlog.Log.Warn("tcp reader goroutine exited")
 	for {
 		select {
 		case <-c.ctx.Done():
@@ -48,13 +49,13 @@ func (c *Connection) StartReader() {
 
 			dataHeadBuf := make([]byte, dp.GetHeadLen())
 			if _, err := io.ReadFull(c.GetConn(), dataHeadBuf); err != nil {
-				utils.GlobalLog.Error(err)
+				ticlog.Log.Error(err)
 				return
 			}
 
 			message, err := dp.Unpack(dataHeadBuf)
 			if err != nil {
-				utils.GlobalLog.Error(err)
+				ticlog.Log.Error(err)
 				return
 			}
 
@@ -62,7 +63,7 @@ func (c *Connection) StartReader() {
 			if message.GetDataLen() > 0 {
 				dataBuf = make([]byte, message.GetDataLen())
 				if _, err := io.ReadFull(c.GetConn(), dataBuf); err != nil {
-					utils.GlobalLog.Error(err)
+					ticlog.Log.Error(err)
 					return
 				}
 			}
@@ -70,7 +71,7 @@ func (c *Connection) StartReader() {
 			message.SetData(dataBuf)
 			request := NewRequest(c, message)
 
-			if utils.GlobalObject.TcpWorkerPoolSize > 0 {
+			if global.Object.TcpWorkerPoolSize > 0 {
 				go c.MsgHandler.SendMsgToTaskQueue(request)
 			} else {
 				go c.MsgHandler.DoMsgHandler(request)
@@ -81,17 +82,17 @@ func (c *Connection) StartReader() {
 }
 
 func (c *Connection) StartWriter() {
-	utils.GlobalLog.Info("tcp writer goroutine is running")
-	defer utils.GlobalLog.Warn("tcp writer goroutine exited")
+	ticlog.Log.Info("tcp writer goroutine is running")
+	defer ticlog.Log.Warn("tcp writer goroutine exited")
 	for {
 		select {
 		case msg := <-c.MsgChan:
 			if _, err := c.Conn.Write(msg); err != nil {
-				utils.GlobalLog.Error(err)
+				ticlog.Log.Error(err)
 				break
 			}
 		case <-c.ctx.Done():
-			utils.GlobalLog.Trace("exit")
+			ticlog.Log.Trace("exit")
 			return
 		}
 	}
