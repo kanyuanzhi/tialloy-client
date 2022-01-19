@@ -8,6 +8,8 @@ type IClient interface {
 	Serve()
 	Dial() net.Conn
 
+	AddRouter(msgID uint32, router IRouter)
+
 	SetOnConnStart(func(connection IConnection))
 	CallOnConnStart(connection IConnection)
 }

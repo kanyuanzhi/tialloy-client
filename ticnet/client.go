@@ -66,6 +66,10 @@ func (c *Client) Serve() {
 	select {}
 }
 
+func (c *Client) AddRouter(msgID uint32, router ticface.IRouter) {
+	c.MsgHandler.AddRouter(msgID, router)
+}
+
 func (c *Client) SetOnConnStart(hookFunc func(connection ticface.IConnection)) {
 	c.OnConnStart = hookFunc
 }
