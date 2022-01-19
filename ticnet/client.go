@@ -49,6 +49,7 @@ func (c *Client) Dial() net.Conn {
 func (c *Client) Start() {
 	ticlog.Log.Info("client is starting")
 	go func() {
+		c.MsgHandler.StartWorkerPool()
 		conn := c.Dial()
 		ticlog.Log.Infof("touch server %s:%d successfully", c.ServerHost, c.ServerPort)
 		dealConn := NewConnection(c, conn, c.MsgHandler)
