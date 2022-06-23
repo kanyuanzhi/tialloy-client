@@ -15,7 +15,7 @@ type Obj struct {
 	Version string `json:"version,omitempty"`
 
 	ServerHost string `json:"server_host,omitempty"`
-	ServerPort int    `json:"host,omitempty"`
+	ServerPort int    `json:"server_port,omitempty"`
 
 	TcpMaxPacketSize    uint32 `json:"tcp_max_packet_size,omitempty"`
 	TcpWorkerPoolSize   uint32 `json:"tcp_worker_pool_size,omitempty"`
